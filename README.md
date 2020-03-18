@@ -1,5 +1,7 @@
 # AtCoder Language Filter
 
+[![GreasyFork](https://img.shields.io/badge/GreasyFork-install-orange)](https://greasyfork.org/ja/scripts/398148-atcoder-language-filter)
+
 AtCoderにおいて，提出言語のフィルタリングと並び替えを行うUserScript．
 
 以下の3つのページにて有効になります．
