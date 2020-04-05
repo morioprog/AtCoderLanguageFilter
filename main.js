@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AtCoder Language Filter
 // @namespace    https://github.com/morioprog
-// @version      1.0.0
+// @version      1.0.1
 // @description  提出言語のフィルタリングと並び替え
 // @author       morio_prog
 // @match        *://atcoder.jp/contests/*/tasks/*
@@ -27,9 +27,6 @@ function moveElementToEndOfParent($ele) {
     /* Load saved languages */
     const lskey = 'userscript-languagefilter-savedlanguage';
     let savedlanguage = JSON.parse(localStorage.getItem(lskey));
-    if (savedlanguage === null) {
-        savedlanguage = ['C++14 (GCC 5.4.1)', 'Python3 (3.4.3)', 'PyPy3 (2.4.0)'];
-    }
 
     /* Build language-map */
     const optmap = new Map(); // {lang: [value, data-mime]}
@@ -84,6 +81,7 @@ function moveElementToEndOfParent($ele) {
 
     let selected = [];
     $.each(savedlanguage, function(i, lang) {
+        if (!optmap.has(lang)) return true;
         const val = optmap.get(lang)[0];
         const mim = optmap.get(lang)[1];
         $select_language.append(
