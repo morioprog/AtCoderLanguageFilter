@@ -12,27 +12,27 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.12/js/select2.min.js
 // ==/UserScript==
 
-function moveElementToEndOfParent($ele) {
-    const parent = $ele.parent();
-    $ele.detach();
-    parent.append($ele);
-}
-
 (function() {
     'use strict';
 
-    const deflang = localStorage.getItem('defaultLang').replace(/[^0-9]/g, '');
-    const $select_language = $('#select-lang select');
+    const DEFAULT_LANGUAGE_KEY = 'defaultLang';
+    const SAVED_LANGUAGE_KEY = 'userscript-languagefilter-savedlanguage';
 
-    /* Load saved languages */
-    const lskey = 'userscript-languagefilter-savedlanguage';
-    let savedlanguage = JSON.parse(localStorage.getItem(lskey));
+    function moveElementToEndOfParent($ele) {
+        const parent = $ele.parent();
+        $ele.detach();
+        parent.append($ele);
+    }
+
+    let defLang = localStorage.getItem(DEFAULT_LANGUAGE_KEY);
+    if (defLang) defLang = defLang.replace(/[^0-9]/g, '');
+    const $selectLanguage = $('#select-lang select');
 
     /* Build language-map */
-    const optmap = new Map(); // {lang: [value, data-mime]}
-    $select_language.children('option').each(function(i, e) {
+    const optMap = new Map(); // {lang: [value, data-mime]}
+    $selectLanguage.children('option').each(function(_, e) {
         const $opt = $(e);
-        optmap.set(
+        optMap.set(
             $opt.text(),
             [
                 $opt.attr('value'),
@@ -70,7 +70,7 @@ function moveElementToEndOfParent($ele) {
     $('body').prepend(modalHtml);
 
     const $lfsel2 = $('select#langfilter-select2');
-    optmap.forEach(function(val, key) {
+    optMap.forEach(function(val, key) {
         $lfsel2.append(
             $('<option>', {
                 value: val[0],
@@ -79,21 +79,29 @@ function moveElementToEndOfParent($ele) {
         );
     });
 
-    let selected = [];
-    if (savedlanguage) {
-        $.each(savedlanguage, function(i, lang) {
-            if (!optmap.has(lang)) return true;
-            const val = optmap.get(lang)[0];
-            const mim = optmap.get(lang)[1];
-            $select_language.append(
+    /* Load saved languages */
+    let savedLanguage = localStorage.getItem(SAVED_LANGUAGE_KEY);
+    let selectedLanguage = [];
+    if (savedLanguage) {
+        try {
+            savedLanguage = JSON.parse(savedLanguage);
+        } catch (error) {
+            savedLanguage = [];
+            console.log(error);
+        }
+        $.each(savedLanguage, function(_, lang) {
+            if (!optMap.has(lang)) return true;
+            const val = optMap.get(lang)[0];
+            const mim = optMap.get(lang)[1];
+            $selectLanguage.append(
                 $('<option>', {
                     'value':     val,
                     'data-mime': mim,
                     'text':      lang,
-                    'selected':  val == deflang,
+                    'selected':  val == defLang,
                 })
             );
-            selected.push(lang);
+            selectedLanguage.push(lang);
             const $opt = $lfsel2.find(`option[value='${val}']`);
             $opt.prop('selected', true);
             moveElementToEndOfParent($opt);
@@ -114,8 +122,10 @@ function moveElementToEndOfParent($ele) {
     $ul.sortable({
         containment: 'parent',
         update: function() {
-            $(this).children("li[title]").each(function(i, li) {
-                const $opt = $lfsel2.children('option').filter(function() { return $(this).html() == li.title });
+            $(this).children("li[title]").each(function(_, li) {
+                const $opt = $lfsel2.children('option').filter(function() {
+                    return $(this).html() == li.title;
+                });
                 moveElementToEndOfParent($opt);
             });
         }
@@ -131,16 +141,16 @@ function moveElementToEndOfParent($ele) {
     });
 
     $('#langfilter-save').on('click', function() {
-        selected = [];
+        selectedLanguage = [];
         $ul.children('li.select2-selection__choice').each(function() {
-            selected.push($(this).text().slice(1));
+            selectedLanguage.push($(this).text().slice(1));
         });
-        if (selected.length === 0) {
+        if (selectedLanguage.length === 0) {
             $('#langfilter-savelabel').removeClass('text-success');
             $('#langfilter-savelabel').addClass('text-danger');
             $('#langfilter-savelabel').text('Please select at least 1 language!');
         } else {
-            localStorage.setItem(lskey, JSON.stringify(selected));
+            localStorage.setItem(SAVED_LANGUAGE_KEY, JSON.stringify(selectedLanguage));
             $('#langfilter-savelabel').removeClass('text-danger');
             $('#langfilter-savelabel').addClass('text-success');
             $('#langfilter-savelabel').text(`Saved (${(new Date()).toLocaleString()})`);
