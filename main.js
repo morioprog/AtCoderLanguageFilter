@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AtCoder Language Filter
 // @namespace    https://github.com/morioprog
-// @version      1.0.1
+// @version      1.0.2
 // @description  提出言語のフィルタリングと並び替え
 // @author       morio_prog
 // @match        *://atcoder.jp/contests/*/tasks/*
