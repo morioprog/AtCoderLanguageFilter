@@ -80,23 +80,25 @@ function moveElementToEndOfParent($ele) {
     });
 
     let selected = [];
-    $.each(savedlanguage, function(i, lang) {
-        if (!optmap.has(lang)) return true;
-        const val = optmap.get(lang)[0];
-        const mim = optmap.get(lang)[1];
-        $select_language.append(
-            $('<option>', {
-                'value':     val,
-                'data-mime': mim,
-                'text':      lang,
-                'selected':  val == deflang,
-            })
-        );
-        selected.push(lang);
-        const $opt = $lfsel2.find(`option[value='${val}']`);
-        $opt.prop('selected', true);
-        moveElementToEndOfParent($opt);
-    });
+    if (savedlanguage) {
+        $.each(savedlanguage, function(i, lang) {
+            if (!optmap.has(lang)) return true;
+            const val = optmap.get(lang)[0];
+            const mim = optmap.get(lang)[1];
+            $select_language.append(
+                $('<option>', {
+                    'value':     val,
+                    'data-mime': mim,
+                    'text':      lang,
+                    'selected':  val == deflang,
+                })
+            );
+            selected.push(lang);
+            const $opt = $lfsel2.find(`option[value='${val}']`);
+            $opt.prop('selected', true);
+            moveElementToEndOfParent($opt);
+        });
+    }
 
     /* Apply Select2 */
     $lfsel2.select2({
